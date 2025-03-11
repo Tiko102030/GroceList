@@ -4,9 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <!-- Use url_for to link static files -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Hello, you are logged in!</h1>
-    <a href="{{url_for('logout')}}">Log out</a>
+    <div class="container">
+        <header>
+            <h1>Welcome, {{ current_user.username }}!</h1>
+        </header>
+
+        <nav>
+            <a href="#">🛒 Shopping Lists</a>
+            <a href="#">📦 Shared Lists</a>
+            <a href="{{ url_for('logout') }}">🚪 Logout</a>
+        </nav>
+
+        <section class="content">
+            <h2>Your Lists</h2>
+            <!-- Example content, will be dynamic based on actual data -->
+            <div class="list">
+                <h3>Weekly Groceries</h3>
+                <ul>
+                    <li>Apples</li>
+                    <li>Bananas</li>
+                    <li>Milk</li>
+                </ul>
+            </div>
+            <div class="list">
+                <h3>Party Supplies</h3>
+                <ul>
+                    <li>Chips</li>
+                    <li>Soda</li>
+                    <li>Cake Mix</li>
+                </ul>
+            </div>
+        </section>
+    </div>
+
+    <!-- Use url_for to link JavaScript files -->
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>

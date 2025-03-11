@@ -4,17 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Login Page</h1>
+    <h1>Login</h1>
 
-    <form method="POST" action="">
-        {{ form.hidden_tag() }}
-        {{ form.username }}
-        {{ form.password }}
-        {{ form.submit }}
+    <!-- Flash Messages for errors/success -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        {{ form.hidden_tag() }}  <!-- CSRF Protection -->
+        
+        <p>{{ form.username.label }} {{ form.username() }}</p>
+        <p>{{ form.password.label }} {{ form.password() }}</p>
+        <p>{{ form.submit() }}</p>
     </form>
 
-    <a href="{{url_for('register')}}">No account? Sign Up</a><br>
+    <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
 </body>
 </html>
