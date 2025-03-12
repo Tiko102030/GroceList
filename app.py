@@ -42,6 +42,24 @@ class RegisterForm(FlaskForm):
             flash("Username already exists. Please choose a different one.", "error")
             raise ValidationError('That username already exists. Please choose a different one.')
 
+class GroceryList(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('grocery_lists', lazy=True))
+
+    def __repr__(self):
+        return f'<GroceryList {self.name}>'
+
+
+class Item(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    grocery_list_id = db.Column(db.Integer, db.ForeignKey('grocery_list.id'), nullable=False)
+
+class GroceryListForm(FlaskForm):
+    list_name = StringField('List Name', validators=[InputRequired(), Length(min=3, max=100)], render_kw={"placeholder": "Enter list name"})
+    submit = SubmitField('Create List')
 
 
 class LoginForm(FlaskForm):
@@ -67,10 +85,11 @@ def login():
             flash("This account doesn't exist. Register below.", "error")
     return render_template('login.html', form=form)
 
-@app.route('/dashboard', methods=['GET', 'POST'])
+@app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    lists = GroceryList.query.filter_by(user_id=current_user.id).all()
+    return render_template('dashboard.html', lists=lists)
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -90,6 +109,38 @@ def register():
         return redirect(url_for('login'))
 
     return render_template('register.html', form=form)
+
+@app.route('/create_list', methods=['GET', 'POST'])
+@login_required
+def create_list():
+    form = GroceryListForm()
+    if form.validate_on_submit():
+        new_list = GroceryList(list_name=form.list_name.data, user_id=current_user.id)
+        db.session.add(new_list)
+        db.session.commit()
+        flash('List created successfully!', 'success')
+        return redirect(url_for('dashboard'))
+    return render_template('create_edit_list.html', form=form)
+
+class ItemForm(FlaskForm):
+    name = StringField(validators=[InputRequired(), Length(min=1, max=100)], render_kw={"placeholder": "Item Name"})
+    submit = SubmitField('Add Item')
+
+@app.route('/add_item/<int:list_id>', methods=['GET', 'POST'])
+@login_required
+def add_item(list_id):
+    list = GroceryList.query.get_or_404(list_id)
+    if list.user != current_user:
+        flash("You are not authorized to edit this list.", "error")
+        return redirect(url_for('dashboard'))
+    form = ItemForm()
+    if form.validate_on_submit():
+        new_item = Item(name=form.name.data, grocery_list_id=list_id)
+        db.session.add(new_item)
+        db.session.commit()
+        flash('Item added successfully!', 'success')
+        return redirect(url_for('dashboard'))
+    return render_template('add_item.html', form=form, list=list)
 
 
 if __name__ == "__main__":
