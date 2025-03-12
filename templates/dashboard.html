@@ -13,8 +13,8 @@
     <h1>Welcome, {{ current_user.username }}!</h1>
 
     <h2>Your Grocery Lists</h2>
-    <ul>
-        {% for list in current_user.lists %}
+    <ul id="groceryListContainer">
+        {% for list in lists %}
             <li>{{ list.name }}</li>
         {% endfor %}
     </ul>
@@ -23,7 +23,7 @@
     <button id="openCreateListModal">Create New List</button>
 
     <!-- Modal -->
-    <div id="createListModal" class="modal">
+    <div id="createListModal" class="modal" style="display: none;">
         <div class="modal-content">
             <h2>Create Grocery List</h2>
             <form id="createListForm">
@@ -52,7 +52,7 @@
             let listName = $('#list_name').val();
 
             $.ajax({
-                url: "{{ url_for('create_list') }}",
+                url: "{{ url_for('create_edit_list') }}",
                 method: "POST",
                 data: {
                     list_name: listName,
@@ -62,7 +62,12 @@
                     // Close the modal and update the list dynamically
                     $('#createListModal').hide();
                     alert('List created successfully!');
-                    location.reload();  // Reload the page to show the new list
+
+                    // Dynamically add the new list to the UI
+                    $('#groceryListContainer').append('<li>' + listName + '</li>');
+                },
+                error: function() {
+                    alert('There was an error creating the list. Please try again.');
                 }
             });
         });

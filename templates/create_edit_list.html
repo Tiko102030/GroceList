@@ -1,47 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create / Edit Grocery List</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/create_edit_list.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>{{ 'Edit' if list else 'Create' }} Grocery List</h1>
+<form method="POST">
+    <!-- CSRF Protection -->
+    {{ form.hidden_tag() }}
 
-        <!-- Flash Messages for errors/success -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                        <p class="{{ category }}">{{ message }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+    <label for="list_name">List Name:</label>
+    {{ form.list_name(class="input-field") }}
 
-        <form method="POST">
-            <!-- CSRF Protection -->
-            {{ form.hidden_tag() }}
+    <button type="submit">{{ 'Update' if list else 'Create' }} List</button>
+</form>
 
-            <label for="list_name">List Name:</label>
-            {{ form.list_name(class="input-field") }}
+{% if list %}
+<h3>Items in your list:</h3>
+<ul>
+    {% for item in list.items %}
+        <li>{{ item.name }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 
-            <button type="submit">{{ 'Update' if list else 'Create' }} List</button>
-        </form>
-
-        {% if list %}
-        <h3>Items in your list:</h3>
-        <ul>
-            {% for item in list.items %}
-                <li>{{ item.name }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        
-        <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
-    </div>
+<a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</div>
 </body>
 </html>
