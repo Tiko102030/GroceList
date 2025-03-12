@@ -1,0 +1,21 @@
+/* Home Page Styles */
+.home-header {
+    font-size: 26px;
+    color: #333;
+}
+
+.home-subtext {
+    color: #666;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.home-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.home-buttons .btn {
+    width: 150px;
+}
