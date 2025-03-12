@@ -1,76 +1,48 @@
-<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <!-- Use url_for to link static files -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <h1>Welcome, {{ current_user.username }}!</h1>
+    <div class="container">
+        <header>
+            <h1>Welcome, {{ current_user.username }}!</h1>
+        </header>
 
-    <h2>Your Grocery Lists</h2>
-    <ul id="groceryListContainer">
-        {% for list in lists %}
-            <li>{{ list.name }}</li>
-        {% endfor %}
-    </ul>
+        <nav>
+            <a href="#">🛒 Shopping Lists</a>
+            <a href="#">📦 Shared Lists</a>
+            <a href="{{ url_for('logout') }}">🚪 Logout</a>
+        </nav>
 
-    <!-- Button to trigger the popup -->
-    <button id="openCreateListModal">Create New List</button>
-
-    <!-- Modal -->
-    <div id="createListModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <h2>Create Grocery List</h2>
-            <form id="createListForm">
-                <label for="list_name">List Name:</label>
-                <input type="text" id="list_name" name="list_name" required>
-                <button type="submit">Create List</button>
-            </form>
-            <button id="closeModal">Close</button>
-        </div>
+        <section class="content">
+            <h2>Your Lists</h2>
+            <!-- Example content, will be dynamic based on actual data -->
+            <div class="list">
+                <h3>List 1</h3>
+                <ul>
+                    <li>Example 1</li>
+                    <li>Example 2</li>
+                    <li>Example 3</li>
+                </ul>
+            </div>
+            <div class="list">
+                <h3>List 2</h3>
+                <ul>
+                    <li>Example 1</li>
+                    <li>Example 2</li>
+                    <li>Example 3</li>
+                </ul>
+            </div>
+        </section>
     </div>
 
-    <script>
-        // Show the modal when the button is clicked
-        $('#openCreateListModal').click(function() {
-            $('#createListModal').show();
-        });
-
-        // Close the modal when the close button is clicked
-        $('#closeModal').click(function() {
-            $('#createListModal').hide();
-        });
-
-        // Submit the form to create a new list
-        $('#createListForm').submit(function(event) {
-            event.preventDefault(); // Prevent the page from refreshing
-            let listName = $('#list_name').val();
-
-            $.ajax({
-                url: "{{ url_for('create_edit_list') }}",
-                method: "POST",
-                data: {
-                    list_name: listName,
-                    csrf_token: '{{ csrf_token() }}'  // CSRF protection
-                },
-                success: function(response) {
-                    // Close the modal and update the list dynamically
-                    $('#createListModal').hide();
-                    alert('List created successfully!');
-
-                    // Dynamically add the new list to the UI
-                    $('#groceryListContainer').append('<li>' + listName + '</li>');
-                },
-                error: function() {
-                    alert('There was an error creating the list. Please try again.');
-                }
-            });
-        });
-    </script>
+    <!-- Use url_for to link JavaScript files -->
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
 </body>
 </html>
