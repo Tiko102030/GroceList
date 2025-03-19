@@ -3,46 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <!-- Use url_for to link static files -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <title>Product List</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Welcome, {{ current_user.username }}!</h1>
-        </header>
-
-        <nav>
-            <a href="#">🛒 Shopping Lists</a>
-            <a href="#">📦 Shared Lists</a>
-            <a href="{{ url_for('logout') }}">🚪 Logout</a>
-        </nav>
-
-        <section class="content">
-            <h2>Your Lists</h2>
-            <!-- Example content, will be dynamic based on actual data -->
-            <div class="list">
-                <h3>List 1</h3>
-                <ul>
-                    <li>Example 1</li>
-                    <li>Example 2</li>
-                    <li>Example 3</li>
-                </ul>
-            </div>
-            <div class="list">
-                <h3>List 2</h3>
-                <ul>
-                    <li>Example 1</li>
-                    <li>Example 2</li>
-                    <li>Example 3</li>
-                </ul>
-            </div>
-        </section>
-    </div>
-
-    <!-- Use url_for to link JavaScript files -->
-    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <h1>Product List</h1>
+    <ul id="product-list">
+        {% for product in products %}
+            <li id="product-{{ product.id }}">
+                {{ product.name }}
+                <button class="remove-btn" data-id="{{ product.id }}">Remove</button>
+            </li>
+        {% endfor %}
+    </ul>
+    
+    <input type="text" id="product-name" placeholder="Enter product name">
+    <button onclick="addProduct()">Add Product</button>
 </body>
 </html>
