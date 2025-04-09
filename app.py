@@ -51,10 +51,22 @@ def clear_items():
 
 @app.route('/items')
 def get_items():
+    sort = request.args.get('sort', 'added')
+    print(f"SORT PARAM: {sort}")  # check what value is passed
+
     conn = get_db_connection()
-    items = conn.execute('SELECT id, item FROM list').fetchall()
+    if sort == 'az':
+        items = conn.execute('SELECT id, item FROM list ORDER BY item COLLATE NOCASE ASC').fetchall()
+    elif sort == 'za':
+        items = conn.execute('SELECT id, item FROM list ORDER BY item COLLATE NOCASE DESC').fetchall()
+    else:
+        items = conn.execute('SELECT id, item FROM list').fetchall()
     conn.close()
+
     return jsonify(items)
+
+
+
 
 
 

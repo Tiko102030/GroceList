@@ -2,30 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Shared Public List</title>
+    <title>Общий Список</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Public List</h1>
+        <h1>Общий Список</h1>
 
         <form id="add-form">
-            <input type="text" id="item-input" placeholder="Type something..." required>
-            <button type="submit">Add</button>
+            <input type="text" id="item-input" placeholder="Напишите пункт..." required>
+            <button type="submit">Добавить</button>
         </form>
+
+        <label for="sort-select">Сортировка:</label>
+        <select id="sort-select">
+            <option value="az">А → Я</option>
+            <option value="za">Я → А</option>
+            <option value="added">По времени добавки</option>
+        </select>
+        
+
         
         <ul id="list">
             {% for id, item in items %}
                 <li data-id="{{ id }}">
                     {{ item }}
-                    <button onclick="deleteItem({{ id }})">Delete</button>
+                    <button onclick="deleteItem({{ id }})">Удалить</button>
                 </li>
             {% endfor %}
         </ul>
         
 
         <button id="clear-button" style="margin-top: 1rem; background: red;">
-            Delete All
+            Удалить Все
         </button>
     </div>
 
@@ -79,7 +89,9 @@
         let lastItemCount = document.querySelectorAll('#list li').length;
 
         setInterval(async () => {
-            const res = await fetch('/items');
+            const sortOrder = document.getElementById('sort-select').value;
+            const res = await fetch(`/items?sort=${sortOrder}`);
+
             const items = await res.json();
 
             if (items.length !== lastItemCount) {
@@ -102,6 +114,11 @@
                 lastItemCount = items.length;
             }
         }, 2000); // every 2 seconds
+
+        document.getElementById('sort-select').addEventListener('change', () => {
+            lastItemCount = -1;  // force full list reload next tick
+        });
+
 
         
         
