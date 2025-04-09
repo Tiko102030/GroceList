@@ -115,37 +115,8 @@
             }
         }, 20000); // every 20 seconds
 
-        // test ---------------------------------------------------------------------
         
-        document.getElementById('sort-select').addEventListener('change', () => {
-            const sortOrder = document.getElementById('sort-select').value;
-            const res = await fetch(`/items?sort=${sortOrder}`);
-
-            const items = await res.json();
-
-            if (items.length !== lastItemCount) {
-                const list = document.getElementById('list');
-                list.innerHTML = '';  // Clear current list
-
-                items.forEach(([id, item]) => {
-                    const li = document.createElement('li');
-                    li.setAttribute('data-id', id);
-                    li.textContent = item + ' ';
-
-                    const delBtn = document.createElement('button');
-                    delBtn.textContent = 'Delete';
-                    delBtn.onclick = () => deleteItem(id);
-
-                    li.appendChild(delBtn);
-                    list.appendChild(li);
-                });
-
-                lastItemCount = items.length;
-            }  // force full list reload next tick
-        });
-
-        // test ---------------------------------------------------------------------
-        // replaced lastItemCount = -1; with the code above
+        
 
 
         
