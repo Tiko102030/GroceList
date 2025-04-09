@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shared Public List</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Public List</h1>
+
+        <form id="add-form">
+            <input type="text" id="item-input" placeholder="Type something..." required>
+            <button type="submit">Add</button>
+            <button type="clear_all">Delete all</button>
+        </form>
+
+        
+
+        <ul id="list">
+            {% for item in items %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        const form = document.getElementById('add-form');
+        const input = document.getElementById('item-input');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const response = await fetch('/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: input.value })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                const li = document.createElement('li');
+                li.textContent = result.item;
+                document.getElementById('list').appendChild(li);
+                input.value = '';
+            }
+        });
+
+        form.addEventListener('clear_all', async (e) => {
+            e.preventDefault();
+            const response = await fetch('clear_all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            if(responce.ok) {
+                const result = await response.json();
+                const li = document.createElement('li');
+                li.textContent = result.item;
+                document.getElementById('list').appendChild(li);
+                input.value = '';
+            }
+        })
+    </script>
+</body>
+</html>
