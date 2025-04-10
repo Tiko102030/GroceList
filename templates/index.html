@@ -59,7 +59,7 @@
             if (response.ok) {
                 const result = await response.json();
                 const li = document.createElement('li');
-                li.setAttribute('data-id', id || result.id);
+                li.setAttribute('data-id', result.id); // Use result.id here, not undefined or an old id
 
                 const wrapper = document.createElement('div');
                 wrapper.style.display = 'flex';
@@ -74,12 +74,12 @@
                 left.style.gap = '0.5rem';
 
                 const itemName = document.createElement('span');
-                itemName.textContent = item || result.item;
+                itemName.textContent = result.item;
                 itemName.style.fontWeight = '500';
 
                 left.appendChild(itemName);
 
-                const countValue = count || result.count;
+                const countValue = result.count;
                 if (parseInt(countValue) > 1) {
                     const countSpan = document.createElement('span');
                     countSpan.textContent = `× ${countValue}`;
@@ -94,18 +94,21 @@
                 // Right side: delete button
                 const delBtn = document.createElement('button');
                 delBtn.textContent = 'Удалить';
-                delBtn.onclick = () => deleteItem(id || result.id);
+                delBtn.onclick = () => deleteItem(result.id);
 
-                wrapper.appendChild(leftSide);
+                wrapper.appendChild(left);
                 wrapper.appendChild(delBtn);
                 li.appendChild(wrapper);
                 document.getElementById('list').appendChild(li);
 
+                // Clear input after adding the item
                 input.value = '';
-
-                fetchAndRenderList();
             }
+
+            // You can still call fetchAndRenderList if you want periodic updates
+            // fetchAndRenderList();
         });
+
 
         document.getElementById('clear-button').addEventListener('click', async () => {
             if (confirm('Are you sure you want to delete everything?')) {
@@ -139,7 +142,7 @@
 
             items.forEach(([id, item, count]) => {
                 const li = document.createElement('li');
-                li.setAttribute('data-id', id || result.id);
+                li.setAttribute('data-id', id || res.id);
 
                 const wrapper = document.createElement('div');
                 wrapper.style.display = 'flex';
@@ -187,7 +190,7 @@
             lastItemCount = items.length;
         }
 
-        setInterval(fetchAndRenderList, 20000); // still check every 20 sec
+        setInterval(fetchAndRenderList, 20000);
         
         document.getElementById('sort-select').addEventListener('change', fetchAndRenderList);        
         
