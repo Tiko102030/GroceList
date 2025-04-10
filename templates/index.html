@@ -59,7 +59,7 @@
             if (response.ok) {
                 const result = await response.json();
                 const li = document.createElement('li');
-                li.setAttribute('data-id', result.id);
+                li.setAttribute('data-id', id || result.id);
 
                 const wrapper = document.createElement('div');
                 wrapper.style.display = 'flex';
@@ -67,20 +67,34 @@
                 wrapper.style.alignItems = 'center';
                 wrapper.style.gap = '1rem';
 
-                // Item and count container
-                const leftSide = document.createElement('span');
-                leftSide.textContent = result.item;
+                // Left side: item + count (if count > 1)
+                const left = document.createElement('div');
+                left.style.display = 'flex';
+                left.style.alignItems = 'center';
+                left.style.gap = '0.5rem';
 
-                if (parseInt(result.count) > 1) {
+                const itemName = document.createElement('span');
+                itemName.textContent = item || result.item;
+                itemName.style.fontWeight = '500';
+
+                left.appendChild(itemName);
+
+                const countValue = count || result.count;
+                if (parseInt(countValue) > 1) {
                     const countSpan = document.createElement('span');
-                    countSpan.textContent = `× ${result.count}`;
-                    countSpan.style.marginLeft = '0.5rem';
-                    leftSide.appendChild(countSpan);
+                    countSpan.textContent = `× ${countValue}`;
+                    countSpan.style.background = '#78ffb6';
+                    countSpan.style.padding = '2px 6px';
+                    countSpan.style.borderRadius = '5px';
+                    countSpan.style.fontSize = '0.85rem';
+                    countSpan.style.color = '#333';
+                    left.appendChild(countSpan);
                 }
 
+                // Right side: delete button
                 const delBtn = document.createElement('button');
                 delBtn.textContent = 'Удалить';
-                delBtn.onclick = () => deleteItem(result.id);
+                delBtn.onclick = () => deleteItem(id || result.id);
 
                 wrapper.appendChild(leftSide);
                 wrapper.appendChild(delBtn);
@@ -125,7 +139,7 @@
 
             items.forEach(([id, item, count]) => {
                 const li = document.createElement('li');
-                li.setAttribute('data-id', id);
+                li.setAttribute('data-id', id || result.id);
 
                 const wrapper = document.createElement('div');
                 wrapper.style.display = 'flex';
@@ -133,24 +147,39 @@
                 wrapper.style.alignItems = 'center';
                 wrapper.style.gap = '1rem';
 
-                // Item and count
-                const leftSide = document.createElement('span');
-                leftSide.textContent = item;
+                // Left side: item + count (if count > 1)
+                const left = document.createElement('div');
+                left.style.display = 'flex';
+                left.style.alignItems = 'center';
+                left.style.gap = '0.5rem';
 
-                if (parseInt(count) > 1) {
+                const itemName = document.createElement('span');
+                itemName.textContent = item || result.item;
+                itemName.style.fontWeight = '500';
+
+                left.appendChild(itemName);
+
+                const countValue = count || result.count;
+                if (parseInt(countValue) > 1) {
                     const countSpan = document.createElement('span');
-                    countSpan.textContent = `× ${count}`;
-                    countSpan.style.marginLeft = '0.5rem';
-                    leftSide.appendChild(countSpan);
+                    countSpan.textContent = `× ${countValue}`;
+                    countSpan.style.background = '#78ffb6';
+                    countSpan.style.padding = '2px 6px';
+                    countSpan.style.borderRadius = '5px';
+                    countSpan.style.fontSize = '0.85rem';
+                    countSpan.style.color = '#333';
+                    left.appendChild(countSpan);
                 }
 
+                // Right side: delete button
                 const delBtn = document.createElement('button');
                 delBtn.textContent = 'Удалить';
-                delBtn.onclick = () => deleteItem(id);
+                delBtn.onclick = () => deleteItem(id || result.id);
 
-                wrapper.appendChild(leftSide);
+                wrapper.appendChild(left);
                 wrapper.appendChild(delBtn);
                 li.appendChild(wrapper);
+
                 list.appendChild(li);
 
             });
