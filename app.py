@@ -20,14 +20,15 @@ def index():
 def add_item():
     data = request.get_json()
     item = data.get('item', '').strip()
+    count = int(data.get('count', 1))
 
     if item:
         conn = get_db_connection()
-        cursor = conn.execute('INSERT INTO list (item) VALUES (?)', (item,))
+        cursor = conn.execute('INSERT INTO list (item, count) VALUES (?, ?)', (item, count))
         item_id = cursor.lastrowid
         conn.commit()
         conn.close()
-        return jsonify({'success': True, 'item': item, 'id': item_id})
+        return jsonify({'success': True, 'item': item, 'id': item_id, 'count': count})
 
     return jsonify({'success': False}), 400
 
@@ -52,17 +53,19 @@ def clear_items():
 @app.route('/items')
 def get_items():
     sort = request.args.get('sort', 'added')
-    print(f"SORT PARAM: {sort}")  # check what value is passed
 
     conn = get_db_connection()
-    if sort == 'az':
-        items = conn.execute('SELECT id, item FROM list ORDER BY item COLLATE NOCASE ASC').fetchall()
-    elif sort == 'za':
-        items = conn.execute('SELECT id, item FROM list ORDER BY item COLLATE NOCASE DESC').fetchall()
-    else:
-        items = conn.execute('SELECT id, item FROM list').fetchall()
-    conn.close()
 
+    if sort == 'az':
+        items = conn.execute('SELECT id, item, count FROM list ORDER BY item COLLATE NOCASE ASC').fetchall()
+    elif sort == 'za':
+        items = conn.execute('SELECT id, item, count FROM list ORDER BY item COLLATE NOCASE DESC').fetchall()
+    elif sort == 'amount':
+        items = conn.execute('SELECT id, item, count FROM list ORDER BY count DESC').fetchall()
+    else:
+        items = conn.execute('SELECT id, item, count FROM list').fetchall()
+
+    conn.close()
     return jsonify(items)
 
 
@@ -70,6 +73,7 @@ def get_items():
 
 
 
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
 

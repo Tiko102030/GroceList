@@ -12,14 +12,17 @@
 
         <form id="add-form">
             <input type="text" id="item-input" placeholder="Напишите пункт..." required>
+            <input type="number" id="count-input" value="1" min="1" required style="width: 70px;">
             <button type="submit">Добавить</button>
         </form>
+        
 
         <label for="sort-select">Сортировка:</label>
         <select id="sort-select">
             <option value="az">А → Я</option>
             <option value="za">Я → А</option>
             <option value="added">По времени добавки</option>
+            <option value="amount">По количеству</option>
         </select>
         
 
@@ -45,25 +48,48 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const count = document.getElementById('count-input').value;
+
             const response = await fetch('/add', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ item: input.value })
+                body: JSON.stringify({ item: input.value, count: count })
             });
 
             if (response.ok) {
                 const result = await response.json();
                 const li = document.createElement('li');
-                li.textContent = result.item + ' ';
                 li.setAttribute('data-id', result.id);
-                
+
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'flex';
+                wrapper.style.justifyContent = 'space-between';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.gap = '1rem';
+
+                // Item and count container
+                const leftSide = document.createElement('span');
+                leftSide.textContent = result.item;
+
+                if (parseInt(result.count) > 1) {
+                    const countSpan = document.createElement('span');
+                    countSpan.textContent = `× ${result.count}`;
+                    countSpan.style.marginLeft = '0.5rem';
+                    leftSide.appendChild(countSpan);
+                }
+
                 const delBtn = document.createElement('button');
-                delBtn.textContent = 'Delete';
+                delBtn.textContent = 'Удалить';
                 delBtn.onclick = () => deleteItem(result.id);
-                
-                li.appendChild(delBtn);
+
+                wrapper.appendChild(leftSide);
+                wrapper.appendChild(delBtn);
+                li.appendChild(wrapper);
                 document.getElementById('list').appendChild(li);
+
                 input.value = '';
+
+                fetchAndRenderList();
             }
         });
 
@@ -88,38 +114,57 @@
         
         let lastItemCount = document.querySelectorAll('#list li').length;
 
-        setInterval(async () => {
+        async function fetchAndRenderList() {
             const sortOrder = document.getElementById('sort-select').value;
             const res = await fetch(`/items?sort=${sortOrder}`);
-
             const items = await res.json();
+            const count = document.getElementById('count-input').value;
 
-            if (items.length !== lastItemCount) {
-                const list = document.getElementById('list');
-                list.innerHTML = '';  // Clear current list
+            const list = document.getElementById('list');
+            list.innerHTML = ''; // Clear list every time
 
-                items.forEach(([id, item]) => {
-                    const li = document.createElement('li');
-                    li.setAttribute('data-id', id);
-                    li.textContent = item + ' ';
+            items.forEach(([id, item, count]) => {
+                const li = document.createElement('li');
+                li.setAttribute('data-id', id);
 
-                    const delBtn = document.createElement('button');
-                    delBtn.textContent = 'Delete';
-                    delBtn.onclick = () => deleteItem(id);
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'flex';
+                wrapper.style.justifyContent = 'space-between';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.gap = '1rem';
 
-                    li.appendChild(delBtn);
-                    list.appendChild(li);
-                });
+                // Item and count
+                const leftSide = document.createElement('span');
+                leftSide.textContent = item;
 
-                lastItemCount = items.length;
-            }
-        }, 20000); // every 20 seconds
+                if (parseInt(count) > 1) {
+                    const countSpan = document.createElement('span');
+                    countSpan.textContent = `× ${count}`;
+                    countSpan.style.marginLeft = '0.5rem';
+                    leftSide.appendChild(countSpan);
+                }
 
+                const delBtn = document.createElement('button');
+                delBtn.textContent = 'Удалить';
+                delBtn.onclick = () => deleteItem(id);
+
+                wrapper.appendChild(leftSide);
+                wrapper.appendChild(delBtn);
+                li.appendChild(wrapper);
+                list.appendChild(li);
+
+            });
+
+            lastItemCount = items.length;
+        }
+
+        setInterval(fetchAndRenderList, 20000); // still check every 20 sec
         
+        document.getElementById('sort-select').addEventListener('change', fetchAndRenderList);        
         
 
 
-        
+        fetchAndRenderList();
         
     </script>
 </body>
