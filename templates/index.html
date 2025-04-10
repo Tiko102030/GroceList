@@ -47,67 +47,79 @@
         const input = document.getElementById('item-input');
 
         form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const count = document.getElementById('count-input').value;
+        e.preventDefault();
+        const count = document.getElementById('count-input').value;
+        const description = prompt('Enter a description for the item:') || '';
 
-            const response = await fetch('/add', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ item: input.value, count: count })
-            });
+        const response = await fetch('/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ item: input.value, count: count, description: description })
+        });
 
-            if (response.ok) {
-                const result = await response.json();
-                const li = document.createElement('li');
-                li.setAttribute('data-id', result.id); // Use result.id here, not undefined or an old id
+        if (response.ok) {
+            const result = await response.json();
+            const li = document.createElement('li');
+            li.setAttribute('data-id', result.id);
 
-                const wrapper = document.createElement('div');
-                wrapper.style.display = 'flex';
-                wrapper.style.justifyContent = 'space-between';
-                wrapper.style.alignItems = 'center';
-                wrapper.style.gap = '1rem';
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.justifyContent = 'space-between';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.gap = '1rem';
 
-                // Left side: item + count (if count > 1)
-                const left = document.createElement('div');
-                left.style.display = 'flex';
-                left.style.alignItems = 'center';
-                left.style.gap = '0.5rem';
+            // Left side: item + count (if count > 1)
+            const left = document.createElement('div');
+            left.style.display = 'flex';
+            left.style.alignItems = 'center';
+            left.style.gap = '0.5rem';
 
-                const itemName = document.createElement('span');
-                itemName.textContent = result.item;
-                itemName.style.fontWeight = '500';
+            const itemName = document.createElement('span');
+            itemName.textContent = result.item;
+            itemName.style.fontWeight = '500';
 
-                left.appendChild(itemName);
+            left.appendChild(itemName);
 
-                const countValue = result.count;
-                if (parseInt(countValue) > 1) {
-                    const countSpan = document.createElement('span');
-                    countSpan.textContent = `× ${countValue}`;
-                    countSpan.style.background = '#78ffb6';
-                    countSpan.style.padding = '2px 6px';
-                    countSpan.style.borderRadius = '5px';
-                    countSpan.style.fontSize = '0.85rem';
-                    countSpan.style.color = '#333';
-                    left.appendChild(countSpan);
-                }
-
-                // Right side: delete button
-                const delBtn = document.createElement('button');
-                delBtn.textContent = 'Удалить';
-                delBtn.onclick = () => deleteItem(result.id);
-
-                wrapper.appendChild(left);
-                wrapper.appendChild(delBtn);
-                li.appendChild(wrapper);
-                document.getElementById('list').appendChild(li);
-
-                // Clear input after adding the item
-                input.value = '';
+            const countValue = result.count;
+            if (parseInt(countValue) > 1) {
+                const countSpan = document.createElement('span');
+                countSpan.textContent = `× ${countValue}`;
+                countSpan.style.background = '#78ffb6';
+                countSpan.style.padding = '2px 6px';
+                countSpan.style.borderRadius = '5px';
+                countSpan.style.fontSize = '0.85rem';
+                countSpan.style.color = '#333';
+                left.appendChild(countSpan);
             }
 
-            // You can still call fetchAndRenderList if you want periodic updates
-            // fetchAndRenderList();
-        });
+            // Right side: edit description button + delete button
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit Description';
+            editBtn.onclick = async () => {
+                const newDescription = prompt('Enter a new description:') || '';
+                const res = await fetch(`/update-description/${result.id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description: newDescription })
+                });
+                if (res.ok) {
+                    alert('Description updated!');
+                }
+            };
+
+            const delBtn = document.createElement('button');
+            delBtn.textContent = 'Удалить';
+            delBtn.onclick = () => deleteItem(result.id);
+
+            wrapper.appendChild(left);
+            wrapper.appendChild(editBtn);
+            wrapper.appendChild(delBtn);
+            li.appendChild(wrapper);
+            document.getElementById('list').appendChild(li);
+
+            input.value = '';
+        }
+    });
 
 
         document.getElementById('clear-button').addEventListener('click', async () => {
@@ -132,58 +144,71 @@
         let lastItemCount = document.querySelectorAll('#list li').length;
 
         async function fetchAndRenderList() {
-            const sortOrder = document.getElementById('sort-select').value;
-            const res = await fetch(`/items?sort=${sortOrder}`);
-            const items = await res.json();
-            const count = document.getElementById('count-input').value;
+        const sortOrder = document.getElementById('sort-select').value;
+        const res = await fetch(`/items?sort=${sortOrder}`);
+        const items = await res.json();
 
-            const list = document.getElementById('list');
-            list.innerHTML = ''; // Clear list every time
+        const list = document.getElementById('list');
+        list.innerHTML = ''; // Clear list every time
 
-            items.forEach(([id, item, count]) => {
-                const li = document.createElement('li');
-                li.setAttribute('data-id', id || res.id);
+        items.forEach(([id, item, count, description]) => {
+            const li = document.createElement('li');
+            li.setAttribute('data-id', id);
 
-                const wrapper = document.createElement('div');
-                wrapper.style.display = 'flex';
-                wrapper.style.justifyContent = 'space-between';
-                wrapper.style.alignItems = 'center';
-                wrapper.style.gap = '1rem';
+            const wrapper = document.createElement('div');
+            wrapper.style.display = 'flex';
+            wrapper.style.justifyContent = 'space-between';
+            wrapper.style.alignItems = 'center';
+            wrapper.style.gap = '1rem';
 
-                // Left side: item + count (if count > 1)
-                const left = document.createElement('div');
-                left.style.display = 'flex';
-                left.style.alignItems = 'center';
-                left.style.gap = '0.5rem';
+            // Left side: item + count (if count > 1)
+            const left = document.createElement('div');
+            left.style.display = 'flex';
+            left.style.alignItems = 'center';
+            left.style.gap = '0.5rem';
 
-                const itemName = document.createElement('span');
-                itemName.textContent = item || result.item;
-                itemName.style.fontWeight = '500';
+            const itemName = document.createElement('span');
+            itemName.textContent = item;
+            itemName.style.fontWeight = '500';
 
-                left.appendChild(itemName);
+            left.appendChild(itemName);
 
-                const countValue = count || result.count;
-                if (parseInt(countValue) > 1) {
-                    const countSpan = document.createElement('span');
-                    countSpan.textContent = `× ${countValue}`;
-                    countSpan.style.background = '#78ffb6';
-                    countSpan.style.padding = '2px 6px';
-                    countSpan.style.borderRadius = '5px';
-                    countSpan.style.fontSize = '0.85rem';
-                    countSpan.style.color = '#333';
-                    left.appendChild(countSpan);
+            if (parseInt(count) > 1) {
+                const countSpan = document.createElement('span');
+                countSpan.textContent = `× ${count}`;
+                countSpan.style.background = '#78ffb6';
+                countSpan.style.padding = '2px 6px';
+                countSpan.style.borderRadius = '5px';
+                countSpan.style.fontSize = '0.85rem';
+                countSpan.style.color = '#333';
+                left.appendChild(countSpan);
+            }
+
+            // Right side: edit description button + delete button
+            const editBtn = document.createElement('button');
+            editBtn.textContent = 'Edit Description';
+            editBtn.onclick = async () => {
+                const newDescription = prompt('Enter a new description:') || '';
+                const res = await fetch(`/update-description/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description: newDescription })
+                });
+                if (res.ok) {
+                    alert('Description updated!');
                 }
+            };
 
-                // Right side: delete button
-                const delBtn = document.createElement('button');
-                delBtn.textContent = 'Удалить';
-                delBtn.onclick = () => deleteItem(id || result.id);
+            const delBtn = document.createElement('button');
+            delBtn.textContent = 'Удалить';
+            delBtn.onclick = () => deleteItem(id);
 
-                wrapper.appendChild(left);
-                wrapper.appendChild(delBtn);
-                li.appendChild(wrapper);
+            wrapper.appendChild(left);
+            wrapper.appendChild(editBtn);
+            wrapper.appendChild(delBtn);
+            li.appendChild(wrapper);
 
-                list.appendChild(li);
+            list.appendChild(li);
 
             });
 

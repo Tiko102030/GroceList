@@ -21,14 +21,18 @@ def add_item():
     data = request.get_json()
     item = data.get('item', '').strip()
     count = int(data.get('count', 1))
+    description = data.get('description', '').strip()
 
     if item:
         conn = get_db_connection()
-        cursor = conn.execute('INSERT INTO list (item, count) VALUES (?, ?)', (item, count))
+        cursor = conn.execute(
+            'INSERT INTO list (item, count, description) VALUES (?, ?, ?)',
+            (item, count, description)
+        )
         item_id = cursor.lastrowid
         conn.commit()
         conn.close()
-        return jsonify({'success': True, 'item': item, 'id': item_id, 'count': count})
+        return jsonify({'success': True, 'item': item, 'id': item_id, 'count': count, 'description': description})
 
     return jsonify({'success': False}), 400
 
@@ -57,16 +61,28 @@ def get_items():
     conn = get_db_connection()
 
     if sort == 'az':
-        items = conn.execute('SELECT id, item, count FROM list ORDER BY item COLLATE NOCASE ASC').fetchall()
+        items = conn.execute('SELECT id, item, count, description FROM list ORDER BY item COLLATE NOCASE ASC').fetchall()
     elif sort == 'za':
-        items = conn.execute('SELECT id, item, count FROM list ORDER BY item COLLATE NOCASE DESC').fetchall()
+        items = conn.execute('SELECT id, item, count, description FROM list ORDER BY item COLLATE NOCASE DESC').fetchall()
     elif sort == 'amount':
-        items = conn.execute('SELECT id, item, count FROM list ORDER BY count DESC').fetchall()
+        items = conn.execute('SELECT id, item, count, description FROM list ORDER BY count DESC').fetchall()
     else:
-        items = conn.execute('SELECT id, item, count FROM list').fetchall()
+        items = conn.execute('SELECT id, item, count, description FROM list').fetchall()
 
     conn.close()
     return jsonify(items)
+
+@app.route('/update-description/<int:item_id>', methods=['POST'])
+def update_description(item_id):
+    data = request.get_json()
+    description = data.get('description', '').strip()
+
+    conn = get_db_connection()
+    conn.execute('UPDATE list SET description = ? WHERE id = ?', (description, item_id))
+    conn.commit()
+    conn.close()
+
+    return jsonify({'success': True})
 
 
 
