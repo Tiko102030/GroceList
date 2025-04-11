@@ -58,3 +58,11 @@ li div {
     justify-content: space-between;
     align-items: center;
 }
+
+#list li div + div {
+    border-left: 2px solid #ccc;
+    padding-left: 10px;
+    margin-left: 10px;
+    color: #666;
+    font-style: italic;
+}

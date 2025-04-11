@@ -10,12 +10,13 @@
     <div class="container">
         <h1>Общий Список</h1>
 
-        <form id="add-form">
-            <input type="text" id="item-input" placeholder="Напишите пункт..." required>
-            <input type="number" id="count-input" value="1" min="1" required style="width: 70px;">
+        <form id="add-form" style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <div style="display: flex; gap: 0.5rem;">
+                <input type="text" id="item-input" placeholder="Напишите пункт..." required>
+                <input type="number" id="count-input" value="1" min="1" required style="width: 70px;">
+            </div>
             <button type="submit">Добавить</button>
         </form>
-        
 
         <label for="sort-select">Сортировка:</label>
         <select id="sort-select">
@@ -24,8 +25,6 @@
             <option value="added">По времени добавки</option>
             <option value="amount">По количеству</option>
         </select>
-        
-
         
         <ul id="list">
             {% for id, item in items %}
@@ -94,16 +93,22 @@
 
             // Right side: edit description button + delete button
             const editBtn = document.createElement('button');
-            editBtn.textContent = 'Edit Description';
+            const editImg = document.createElement('img');
+            editImg.src = '/static/images/description_icon.png';
+            editImg.alt = 'Edit Description';
+            editImg.style.width = '20px';
+            editImg.style.height = '20px';
+            editBtn.appendChild(editImg);
             editBtn.onclick = async () => {
-                const newDescription = prompt('Enter a new description:') || '';
-                const res = await fetch(`/update-description/${result.id}`, {
+                // Use the current description in the prompt
+                const newDescription = prompt('Enter a new description:', description) || description;
+                const res = await fetch(`/update-description/${id}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ description: newDescription })
                 });
                 if (res.ok) {
-                    alert('Description updated!');
+                    fetchAndRenderList(); // Refresh the list to show the updated description
                 }
             };
 
@@ -144,72 +149,88 @@
         let lastItemCount = document.querySelectorAll('#list li').length;
 
         async function fetchAndRenderList() {
-        const sortOrder = document.getElementById('sort-select').value;
-        const res = await fetch(`/items?sort=${sortOrder}`);
-        const items = await res.json();
+            const sortOrder = document.getElementById('sort-select').value;
+            const res = await fetch(`/items?sort=${sortOrder}`);
+            const items = await res.json();
 
-        const list = document.getElementById('list');
-        list.innerHTML = ''; // Clear list every time
+            const list = document.getElementById('list');
+            list.innerHTML = ''; // Clear list every time
 
-        items.forEach(([id, item, count, description]) => {
-            const li = document.createElement('li');
-            li.setAttribute('data-id', id);
+            items.forEach(([id, item, count, description]) => {
+                const li = document.createElement('li');
+                li.setAttribute('data-id', id);
 
-            const wrapper = document.createElement('div');
-            wrapper.style.display = 'flex';
-            wrapper.style.justifyContent = 'space-between';
-            wrapper.style.alignItems = 'center';
-            wrapper.style.gap = '1rem';
+                const wrapper = document.createElement('div');
+                wrapper.style.display = 'flex';
+                wrapper.style.justifyContent = 'space-between';
+                wrapper.style.alignItems = 'center';
+                wrapper.style.gap = '1rem';
 
-            // Left side: item + count (if count > 1)
-            const left = document.createElement('div');
-            left.style.display = 'flex';
-            left.style.alignItems = 'center';
-            left.style.gap = '0.5rem';
+                // Left side: item + count (if count > 1)
+                const left = document.createElement('div');
+                left.style.display = 'flex';
+                left.style.alignItems = 'center';
+                left.style.gap = '0.5rem';
 
-            const itemName = document.createElement('span');
-            itemName.textContent = item;
-            itemName.style.fontWeight = '500';
+                const itemName = document.createElement('span');
+                itemName.textContent = item;
+                itemName.style.fontWeight = '500';
 
-            left.appendChild(itemName);
+                left.appendChild(itemName);
 
-            if (parseInt(count) > 1) {
-                const countSpan = document.createElement('span');
-                countSpan.textContent = `× ${count}`;
-                countSpan.style.background = '#78ffb6';
-                countSpan.style.padding = '2px 6px';
-                countSpan.style.borderRadius = '5px';
-                countSpan.style.fontSize = '0.85rem';
-                countSpan.style.color = '#333';
-                left.appendChild(countSpan);
-            }
-
-            // Right side: edit description button + delete button
-            const editBtn = document.createElement('button');
-            editBtn.textContent = 'Edit Description';
-            editBtn.onclick = async () => {
-                const newDescription = prompt('Enter a new description:') || '';
-                const res = await fetch(`/update-description/${id}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ description: newDescription })
-                });
-                if (res.ok) {
-                    alert('Description updated!');
+                if (parseInt(count) > 1) {
+                    const countSpan = document.createElement('span');
+                    countSpan.textContent = `× ${count}`;
+                    countSpan.style.background = '#78ffb6';
+                    countSpan.style.padding = '2px 6px';
+                    countSpan.style.borderRadius = '5px';
+                    countSpan.style.fontSize = '0.85rem';
+                    countSpan.style.color = '#333';
+                    left.appendChild(countSpan);
                 }
-            };
 
-            const delBtn = document.createElement('button');
-            delBtn.textContent = 'Удалить';
-            delBtn.onclick = () => deleteItem(id);
+                // Right side: edit description button + delete button
+                const editBtn = document.createElement('button');
+                const editImg = document.createElement('img');
+                editImg.src = '/static/images/description_icon.png';
+                editImg.alt = 'Edit Description';
+                editImg.style.width = '20px';
+                editImg.style.height = '20px';
+                editBtn.appendChild(editImg);
+                editBtn.onclick = async () => {
+                    const newDescription = prompt('Enter a new description:', description) || description;
+                    const res = await fetch(`/update-description/${id}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ description: newDescription })
+                    });
+                    if (res.ok) {
+                        fetchAndRenderList(); // Refresh the list to show the updated description
+                    }
+                };
 
-            wrapper.appendChild(left);
-            wrapper.appendChild(editBtn);
-            wrapper.appendChild(delBtn);
-            li.appendChild(wrapper);
+                const delBtn = document.createElement('button');
+                delBtn.textContent = 'Удалить';
+                delBtn.onclick = () => deleteItem(id);
 
-            list.appendChild(li);
+                wrapper.appendChild(left);
+                wrapper.appendChild(editBtn);
+                wrapper.appendChild(delBtn);
 
+                // Add description below the item bar
+                const descriptionDiv = document.createElement('div');
+                descriptionDiv.style.marginTop = '0.5rem';
+                descriptionDiv.style.fontSize = '0.85rem';
+                descriptionDiv.style.color = '#666';
+                descriptionDiv.style.paddingLeft = '1rem'; // Indent the description
+                descriptionDiv.textContent = description || ''; // Only show if description exists
+
+                li.appendChild(wrapper);
+                if (description) {
+                    li.appendChild(descriptionDiv); // Append description only if it exists
+                }
+
+                list.appendChild(li);
             });
 
             lastItemCount = items.length;
@@ -219,10 +240,7 @@
         
         document.getElementById('sort-select').addEventListener('change', fetchAndRenderList);        
         
-
-
         fetchAndRenderList();
-        
     </script>
 </body>
 </html>
