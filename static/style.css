@@ -66,3 +66,44 @@ li div {
     color: #666;
     font-style: italic;
 }
+
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+.dark-mode .container {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+}
+
+.dark-mode input, .dark-mode select {
+    background-color: #333;
+    color: #ffffff;
+    border: 1px solid #555;
+}
+
+.dark-mode button {
+    background-color: #12c559;
+    color: #ffffff;
+}
+
+.dark-mode button#dark-mode-toggle {
+    background-color: #444;
+    color: #fcfcfc;
+    border: none;
+    cursor: pointer;
+}
+
+
+body.dark-mode li {
+    background: #22362e;
+    color: #12c559; 
+    border-bottom: 5px solid #12c559;
+}
+
+body.dark-mode li div.description {
+    color: #a0c4ff; /* Light blue for dark mode */
+    font-style: normal; /* Remove italic if desired */
+    padding-left: 1rem; /* Keep the indentation */
+}

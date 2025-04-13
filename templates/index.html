@@ -5,6 +5,7 @@
     <title>Общий Список</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <button id="dark-mode-toggle" style="margin-bottom: 1rem;">Toggle Dark Mode</button>
 </head>
 <body>
     <div class="container">
@@ -48,7 +49,7 @@
         form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const count = document.getElementById('count-input').value;
-        const description = prompt('Enter a description for the item:') || '';
+        const description = '';
 
         const response = await fetch('/add', {
             method: 'POST',
@@ -101,15 +102,34 @@
             editImg.style.height = '20px';
             editBtn.appendChild(editImg);
             editBtn.onclick = async () => {
-                // Use the current description in the prompt
-                const newDescription = prompt('Enter a new description:', description) || description;
-                const res = await fetch(`/update-description/${id}`, {
+                // Dynamically get the current description from the DOM
+                const descriptionDiv = li.querySelector('div.description');
+                const currentDescription = descriptionDiv ? descriptionDiv.textContent : '';
+
+                // Prompt the user for a new description
+                const newDescription = prompt('Enter a new description:', currentDescription) || currentDescription;
+
+                // Send the updated description to the server
+                const res = await fetch(`/update-description/${result.id}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ description: newDescription })
                 });
+
                 if (res.ok) {
-                    fetchAndRenderList(); // Refresh the list to show the updated description
+                    // Update the description in the DOM
+                    if (descriptionDiv) {
+                        descriptionDiv.textContent = newDescription;
+                    } else {
+                        const newDescriptionDiv = document.createElement('div');
+                        newDescriptionDiv.classList.add('description');
+                        newDescriptionDiv.style.marginTop = '0.5rem';
+                        newDescriptionDiv.style.fontSize = '0.85rem';
+                        newDescriptionDiv.style.color = '#666';
+                        newDescriptionDiv.style.paddingLeft = '1rem';
+                        newDescriptionDiv.textContent = newDescription;
+                        li.appendChild(newDescriptionDiv);
+                    }
                 }
             };
 
@@ -242,6 +262,17 @@
         document.getElementById('sort-select').addEventListener('change', fetchAndRenderList);        
         
         fetchAndRenderList();
+
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+        if (localStorage.getItem('dark-mode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+        }
+
+        darkModeToggle.addEventListener('click', () => {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            localStorage.setItem('dark-mode', isDarkMode ? 'enabled' : 'disabled');
+        });
     </script>
 </body>
 </html>
