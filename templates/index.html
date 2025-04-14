@@ -5,7 +5,7 @@
     <title>Общий Список</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <button id="dark-mode-toggle" style="margin-bottom: 1rem;">Toggle Dark Mode</button>
+    <button id="dark-mode-toggle" style="margin-bottom: 1rem;">Темный Режим</button>
 </head>
 <body>
     <div class="container">
@@ -13,7 +13,8 @@
 
         <form id="add-form" style="display: flex; flex-direction: column; gap: 0.5rem;">
             <div style="display: flex; gap: 0.5rem;">
-                <input type="text" id="item-input" placeholder="Напишите пункт..." required>
+                <input type="text" id="item-input" placeholder="Напишите пункт..." list="history-suggestions" required>
+                <datalist id="history-suggestions"></datalist>
                 <input type="number" id="count-input" value="1" min="1" required style="width: 70px;">
             </div>
             <button type="submit">Добавить</button>
@@ -45,6 +46,36 @@
     <script>
         const form = document.getElementById('add-form');
         const input = document.getElementById('item-input');
+        const datalist = document.getElementById('history-suggestions');
+
+        // Fetch history items and populate the datalist
+        async function fetchAndPopulateSuggestions(query) {
+            const res = await fetch('/history-items');
+            const historyItems = await res.json();
+
+            // Filter suggestions based on the user's input
+            const filteredItems = historyItems.filter(item => item.toLowerCase().includes(query.toLowerCase()));
+
+            // Clear existing suggestions
+            datalist.innerHTML = '';
+
+            // Add filtered suggestions to the datalist
+            filteredItems.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                datalist.appendChild(option);
+            });
+        }
+
+        // Add an event listener to the input field to fetch suggestions as the user types
+        input.addEventListener('input', () => {
+            const query = input.value;
+            if (query.length > 0) {
+                fetchAndPopulateSuggestions(query);
+            } else {
+                datalist.innerHTML = ''; // Clear suggestions if input is empty
+            }
+        });
 
         form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -272,6 +303,27 @@
         darkModeToggle.addEventListener('click', () => {
             const isDarkMode = document.body.classList.toggle('dark-mode');
             localStorage.setItem('dark-mode', isDarkMode ? 'enabled' : 'disabled');
+        });
+
+        async function fetchAndPopulateSuggestions() {
+            const res = await fetch('/history-items');
+            const historyItems = await res.json();
+
+            const datalist = document.getElementById('history-suggestions');
+            datalist.innerHTML = ''; // Clear existing suggestions
+
+            historyItems.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                datalist.appendChild(option);
+            });
+        }
+
+        // Fetch and populate suggestions on page load
+        fetchAndPopulateSuggestions();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAndRenderList();
         });
     </script>
 </body>
